@@ -1,0 +1,16 @@
+Steps for local setup
+1. Activate the virtual environment:
+    ```
+    # macOS and Linux
+   source venv/bin/activate
+
+   # Windows
+   venv\Scripts\activate
+   ```
+2. export OPENAI_API_KEY=
+
+3. save dependencies
+    ```
+    pip freeze > requirements.txt
+    ```
+    
