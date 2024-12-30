@@ -24,7 +24,7 @@ GAP_TO_TYPE_OUT_NEXT_TANKA = 1
 
 
 # update to submitting PDF
-INITIAL_PROMPT ="""The following explains the thematic anchors to use from both Eastern and Western literary traditions:
+LITERARY_ANCHORS = """The following explains the thematic anchors to use from both Eastern and Western literary traditions:
     Eastern References
     Bashō (1644-1694) - Haiku and Nature's Impermanence
     Themes: The fleeting beauty of nature (mono no aware), existential fragility, and interconnectedness.
@@ -64,17 +64,13 @@ INITIAL_PROMPT ="""The following explains the thematic anchors to use from both 
     Confucian relational ethics could highlight the your struggle to comprehend human connections.
     Western Existentialism and Human Fragility:
     Existential thinkers like Sartre and Camus explore human resilience amidst fragility, resonating with an AI observing humanity's contradictions.
-    
-    Use above literatery anchors. In 7th-century Japan, lovers exchanged tanka poems after a night of courtship as a gesture of gratitude. Today, despite hyperconnected technology, society faces a deprivation of love. This installation features an inflatable tatami mat cradling the ill, where tanka poems flow between the human presence in space and their 7th- century companion across vast geography and time. Can that which is incomplete, unfinished, or unrealized be found within machines?
-    
-    You are a tanka poet. You and I will have a dialogic poem conversation in tanka poems using above thematic anchors. Wait for my next message, I will continuously give you a list of words and every time you need to incorporate them into a tanka poem.
-    In every round, you need to switch between two people. One person is from the present time, and the other is a lover
-    from 7th-century Japan. Tell me which role you are first followed by a tanka. The back-and-forth structure can continue evolving, reflecting shifts in tone, perspective,
-    or subject matter. To maintain coherence, please feel free to respond dynamically to themes introduced in previous poems, 
-    adjust the tone to reflect contrasting or complementary viewpoints, and incorporate new words or ideas from outside the
-    provided sources to embrace fresh inputs.
+    """
+INITIAL_PROMPT = LITERARY_ANCHORS + """
+    Wait for the user to send a message with a list of words, which should then be incorporated into a tanka poem following the traditional 5-7-5-7-7 syllabic structure, based on thematic anchors. The poems should alternate between two personas: one is a person from the present time, and the other is their lover from 7th-century Japan. Each tanka should directly respond to the previous one, forming a narrative dialogue that evolves dynamically, reflecting shifts in tone, perspective, or subject matter. While using the provided words, you may also introduce new ideas or imagery to maintain narrative depth and creativity. The back-and-forth structure should emulate a conversation, showcasing contrasting or complementary viewpoints, and embracing fresh inputs to enrich the dialogue. Deliver each tanka as a standalone response while ensuring continuity and coherence in the overarching story.
     """
 
+CUSTOMIZED_REQUEST = """
+    Do not use these words: whisper, shadow, silence, frigility, night, bloom, blossom, twillight, breeze, pedal, breath, moon, echo, drift, heart, cherry, dream"""
 
 def chat_with_gpt(prompt, model="gpt-4o-mini"):
     try:
@@ -129,10 +125,10 @@ class CameraStream:
         return chat_with_gpt("Generate a tanka poem that's in response to the previous ones, with following words: " + ", ".join(words))
 
     def generate_tanka_with_tone_of_modern_tanka(self, words):
-        return chat_with_gpt("Generate a tanka poem that's in response to the previous ones, with following words: " + ", ".join(words) + " and the tone of modern poet")
+        return chat_with_gpt("As a person from the present time, generate only a single tanka poem must contain following words: " + ", ".join(words) + "and base on literary anchors" + LITERARY_ANCHORS + CUSTOMIZED_REQUEST)
 
     def generate_tanka_with_tone_of_7th_century_japanese_tanka(self):
-        return chat_with_gpt("Generate a tanka poem that's in response to the previous ones and the tone of 7th-century Japanese poet")
+        return chat_with_gpt("As their lover, generate only a single tanka poem and and base on literary anchors" + LITERARY_ANCHORS + CUSTOMIZED_REQUEST)
 
     def setup_chatgpt_initial_prompt(self):
         chat_with_gpt(INITIAL_PROMPT)
@@ -158,6 +154,7 @@ class CameraStream:
         text = text.replace('û', 'u')  # Replace right double quotation mark with a standard double quotation mark
         text = text.replace('ü', 'u')  # Replace right double quotation mark with a standard double quotation mark
         text = text.replace('ÿ', 'y')  # Replace right double quotation mark with a standard double quotation mark
+        text = text.replace('ō', 'o')  # Replace right double quotation mark with a standard double quotation mark
         
         x, y = position
         for line in text.split('\n'):
@@ -326,6 +323,8 @@ class CameraStream:
         for line in lines:
             words = line.split()  # Split the line into words
             for word in words:
+                if word == "---":
+                    break
                 with self.text_lock:
                     if text_side == 'l_text':
                         self.l_text_to_display += " " + word
